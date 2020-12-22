@@ -23,17 +23,17 @@ impl Vec3 {
     pub fn random_on_unit_sphere() -> Vec3 {
         loop {
             let vec = Vec3::new(random_gaussian(), random_gaussian(), random_gaussian());
-            if vec.x() != 0.0 && vec.y() != 0.0 && vec.z() != 0.0 {
-                return vec / vec.length();
+            if vec.length_squared() > 0.0 {
+                return vec.unit();
             }
         }
     }
     
     pub fn random_in_unit_disc() -> Vec3 {
         loop {
-            let vec = Vec3::new(random_gaussian(), random_gaussian(), 0.0);
-            if vec.x() != 0.0 && vec.y() != 0.0 {
-                return vec / vec.length();
+            let vec = Vec3::new(random_range(-1.0, 1.0), random_range(-1.0, 1.0), 0.0);
+            if vec.length_squared() < 1.0 {
+                return vec;
             }
         }
     }
@@ -57,8 +57,8 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
-    pub fn unit(&self) -> Vec3 {
-        Vec3(self.0, self.1, self.2) / self.length()
+    pub fn unit(self) -> Vec3 {
+        self / self.length()
     }
 
     pub fn write_colour(&self, samples_per_pixel: u32) -> String {
