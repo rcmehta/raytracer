@@ -1,5 +1,5 @@
 # raytracer
-A raytracer built in rust, based on https://raytracing.github.io/books/RayTracingInOneWeekend.html with added parallelisation with rayon on sampling/anti-aliasing.
+A raytracer built in rust, based on [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html) with added parallelisation with rayon on sampling/anti-aliasing.
 
 # Final random image:
 
