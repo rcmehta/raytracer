@@ -46,10 +46,17 @@ impl Material for Metal {
     fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> (bool, Ray, Colour) {
         let reflected = reflect(ray_in.direction(), hit_record.n());
 
-        let ray_scattered = Ray::new(hit_record.p(), reflected + Vec3::random_on_unit_sphere() * self.fuzz);
+        let ray_scattered = Ray::new(
+            hit_record.p(),
+            reflected + Vec3::random_on_unit_sphere() * self.fuzz,
+        );
         let attentuation = self.albedo;
 
-        (dot(&ray_scattered.direction(), &hit_record.n()) > 0.0, ray_scattered, attentuation) 
+        (
+            dot(&ray_scattered.direction(), &hit_record.n()) > 0.0,
+            ray_scattered,
+            attentuation,
+        )
     }
 }
 
@@ -70,7 +77,11 @@ impl Dielectric {
 
 impl Material for Dielectric {
     fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> (bool, Ray, Colour) {
-        let refractive_ratio = if hit_record.front_face() { 1.0 / self.refractive_index } else { self.refractive_index };
+        let refractive_ratio = if hit_record.front_face() {
+            1.0 / self.refractive_index
+        } else {
+            self.refractive_index
+        };
 
         let unit_direction = ray_in.direction().unit();
         let cos_theta = dot(&(-unit_direction), &hit_record.n()).min(1.0);
@@ -87,7 +98,7 @@ impl Material for Dielectric {
 
         let ray_scattered = Ray::new(hit_record.p(), direction);
         let attentuation = Colour::new(1.0, 1.0, 1.0);
-        
+
         (true, ray_scattered, attentuation)
     }
 }

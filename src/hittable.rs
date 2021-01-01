@@ -19,17 +19,37 @@ pub struct HitRecord {
 
 impl HitRecord {
     pub fn new(p: Point3, n: Vec3, t: F, front_face: bool, material: Arc<M>) -> HitRecord {
-        HitRecord {p, n, t, front_face, material }
+        HitRecord {
+            p,
+            n,
+            t,
+            front_face,
+            material,
+        }
     }
 
-    pub fn p(&self) -> Point3 { self.p }
-    pub fn n(&self) -> Vec3 { self.n }
-    pub fn t(&self) -> F { self.t }
-    pub fn front_face(&self) -> bool { self.front_face }
-    pub fn material(&self) -> Arc<M> { Arc::clone(&self.material) }
-    pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: Vec3) { 
+    pub fn p(&self) -> Point3 {
+        self.p
+    }
+    pub fn n(&self) -> Vec3 {
+        self.n
+    }
+    pub fn t(&self) -> F {
+        self.t
+    }
+    pub fn front_face(&self) -> bool {
+        self.front_face
+    }
+    pub fn material(&self) -> Arc<M> {
+        Arc::clone(&self.material)
+    }
+    pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: Vec3) {
         self.front_face = dot(&ray.direction(), &outward_normal) < 0.0;
-        self.n = if self.front_face { outward_normal } else { -outward_normal };
+        self.n = if self.front_face {
+            outward_normal
+        } else {
+            -outward_normal
+        };
     }
 }
 
@@ -39,7 +59,9 @@ pub struct HittableList {
 
 impl HittableList {
     pub fn new() -> HittableList {
-        HittableList { objects: Vec::new() }
+        HittableList {
+            objects: Vec::new(),
+        }
     }
 
     pub fn add(&mut self, object: Arc<H>) {
@@ -52,7 +74,7 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: &Ray, t_min: F, t_max: F) ->  Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: F, t_max: F) -> Option<HitRecord> {
         let mut hit_record: Option<HitRecord> = None;
         let mut closest = t_max;
 

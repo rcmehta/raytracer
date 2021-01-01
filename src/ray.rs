@@ -27,7 +27,9 @@ pub fn ray_colour(ray_in: &Ray, world: &HittableList, depth: u32) -> Colour {
     if depth <= 0 {
         Colour::new(0.0, 0.0, 0.0)
     } else if let Some(mut hit_record) = world.hit(ray_in, 0.001, f64::INFINITY) {
-        if let (true, ray_scattered, attentuation) = hit_record.material().scatter(ray_in, &mut hit_record) {
+        if let (true, ray_scattered, attentuation) =
+            hit_record.material().scatter(ray_in, &mut hit_record)
+        {
             ray_colour(&ray_scattered, world, depth - 1) * attentuation
         } else {
             Colour::new(0.0, 0.0, 0.0)
