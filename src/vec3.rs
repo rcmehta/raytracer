@@ -1,7 +1,7 @@
+use std::ops::{Add, Div, Mul, Neg, Sub};
 use std::{fmt::Display, fmt::Formatter, fmt::Result, iter::Sum};
-use std::ops::{Add, Sub, Mul, Div, Neg};
 
-use rand::{Rng, thread_rng};
+use rand::{thread_rng, Rng};
 use rand_distr::StandardNormal;
 
 pub type F = f64;
@@ -17,7 +17,11 @@ impl Vec3 {
     }
 
     pub fn random_vector(min: F, max: F) -> Vec3 {
-        Vec3(random_range(min, max), random_range(min, max), random_range(min, max))
+        Vec3(
+            random_range(min, max),
+            random_range(min, max),
+            random_range(min, max),
+        )
     }
 
     pub fn random_on_unit_sphere() -> Vec3 {
@@ -28,7 +32,7 @@ impl Vec3 {
             }
         }
     }
-    
+
     pub fn random_in_unit_disc() -> Vec3 {
         loop {
             let vec = Vec3::new(random_range(-1.0, 1.0), random_range(-1.0, 1.0), 0.0);
@@ -37,12 +41,18 @@ impl Vec3 {
             }
         }
     }
-    
-    pub fn x(&self) -> F { self.0 }
 
-    pub fn y(&self) -> F { self.1 }
+    pub fn x(&self) -> F {
+        self.0
+    }
 
-    pub fn z(&self) -> F { self.2 }
+    pub fn y(&self) -> F {
+        self.1
+    }
+
+    pub fn z(&self) -> F {
+        self.2
+    }
 
     pub fn near_zero(&self) -> bool {
         let epsilon = 1e-10;
@@ -67,13 +77,15 @@ impl Vec3 {
         let colour = Vec3::new(
             (self.0 * scale).sqrt(),
             (self.1 * scale).sqrt(),
-            (self.2 * scale).sqrt());
-        format!("{} {} {}", 
-        (clamp(colour.0, 0.0, 0.999) * 256.0).floor(),
-        (clamp(colour.1, 0.0, 0.999) * 256.0).floor(),
-        (clamp(colour.2, 0.0, 0.999) * 256.0).floor())
+            (self.2 * scale).sqrt(),
+        );
+        format!(
+            "{} {} {}",
+            (clamp(colour.0, 0.0, 0.999) * 256.0).floor(),
+            (clamp(colour.1, 0.0, 0.999) * 256.0).floor(),
+            (clamp(colour.2, 0.0, 0.999) * 256.0).floor()
+        )
     }
-
 }
 
 impl Display for Vec3 {
@@ -86,10 +98,7 @@ impl Add for Vec3 {
     type Output = Vec3;
 
     fn add(self, other: Self) -> Self {
-        Vec3(
-            self.0 + other.0,
-            self.1 + other.1,
-            self.2 + other.2)
+        Vec3(self.0 + other.0, self.1 + other.1, self.2 + other.2)
     }
 }
 
@@ -97,10 +106,7 @@ impl Sub for Vec3 {
     type Output = Vec3;
 
     fn sub(self, other: Self) -> Self {
-        Vec3(
-            self.0 - other.0,
-            self.1 - other.1,
-            self.2 - other.2)
+        Vec3(self.0 - other.0, self.1 - other.1, self.2 - other.2)
     }
 }
 
@@ -140,10 +146,13 @@ impl Div<F> for Vec3 {
 }
 
 impl Sum<Vec3> for Vec3 {
-    fn sum<I> (iter: I) -> Vec3 where I: Iterator<Item=Vec3> {
-        iter.fold(Vec3(0.0, 0.0, 0.0), |u, v| Vec3(
-            u.x() + v.x(), u.y() + v.y(), u.z() + v.z()
-        ))
+    fn sum<I>(iter: I) -> Vec3
+    where
+        I: Iterator<Item = Vec3>,
+    {
+        iter.fold(Vec3(0.0, 0.0, 0.0), |u, v| {
+            Vec3(u.x() + v.x(), u.y() + v.y(), u.z() + v.z())
+        })
     }
 }
 
@@ -171,9 +180,13 @@ pub fn refract(ray_in: Vec3, n: Vec3, eta_over_eta_prime: F) -> Vec3 {
 }
 
 pub fn clamp(x: F, min: F, max: F) -> F {
-    if x < min { return min; }
-    else if x > max { return max; }
-    else { return x; }
+    if x < min {
+        return min;
+    } else if x > max {
+        return max;
+    } else {
+        return x;
+    }
 }
 
 // Random

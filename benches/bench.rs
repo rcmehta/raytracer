@@ -17,7 +17,7 @@ fn random_on_by_gaussian() -> Vec3 {
 fn random_on_by_rejection() -> Vec3 {
     loop {
         let vec = Vec3::random_vector(-1.0, 1.0);
-        if vec.length_squared() > 0.0 && vec.length_squared() <= 1.0{
+        if vec.length_squared() > 0.0 && vec.length_squared() <= 1.0 {
             return vec.unit();
         }
     }

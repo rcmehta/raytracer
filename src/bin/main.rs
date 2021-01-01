@@ -5,22 +5,19 @@ extern crate rayon;
 use image::io::Reader as ImageReader;
 use rayon::prelude::*;
 
-use std::{error::Error, fs, io::Write, sync::Arc}; 
+use std::{error::Error, fs, io::Write, sync::Arc};
 
-use raytracer::{
-    camera::*,
-    hittable::*,
-    material::*, 
-    ray::*, 
-    sphere::*,
-    vec3::*
-};
+use raytracer::{camera::*, hittable::*, material::*, ray::*, sphere::*, vec3::*};
 
 fn random_scene() -> HittableList {
     let mut world = HittableList::new();
 
     let ground_material = Arc::new(Lambertian::new(Colour::new(0.5, 0.5, 0.5)));
-    world.add(Arc::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, ground_material)));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        ground_material,
+    )));
 
     for a in -11..11 {
         for b in -11..11 {
@@ -50,13 +47,25 @@ fn random_scene() -> HittableList {
     }
 
     let lambertian = Arc::new(Lambertian::new(Colour::new(0.4, 0.2, 0.1)));
-    world.add(Arc::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, lambertian)));
-    
+    world.add(Arc::new(Sphere::new(
+        Point3::new(-4.0, 1.0, 0.0),
+        1.0,
+        lambertian,
+    )));
+
     let dielectric = Arc::new(Dielectric::new(1.5));
-    world.add(Arc::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, dielectric)));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 1.0, 0.0),
+        1.0,
+        dielectric,
+    )));
 
     let metal = Arc::new(Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
-    world.add(Arc::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, metal)));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(4.0, 1.0, 0.0),
+        1.0,
+        metal,
+    )));
 
     world
 }
@@ -78,8 +87,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let v_up = Point3::new(0.0, 1.0, 0.0);
     let distance_to_focus = 10.0;
     let aperture = 0.1;
-    
-    let camera = Camera::new(look_from, look_at, v_up, 20.0, ASPECT_RATIO, aperture, distance_to_focus);
+
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        v_up,
+        20.0,
+        ASPECT_RATIO,
+        aperture,
+        distance_to_focus,
+    );
 
     // Create and initialise .ppm file
     let name = "image".to_string();
@@ -91,13 +108,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     for j in (0..IMAGE_HEIGHT).rev() {
         eprint!("\rRemaining: {} / {}", j, IMAGE_HEIGHT);
         for i in 0..IMAGE_WIDTH {
-            let colour: Colour = (0..SAMPLES_PER_PIXEL).into_par_iter().map(|_| {
-                let u = (i as F + random()) / (IMAGE_WIDTH - 1) as F;
-                let v = (j as F + random()) / (IMAGE_HEIGHT - 1) as F;
-                let ray = camera.get_ray(u, v);
-                let local_colour = ray_colour(&ray, &world, MAX_DEPTH);
-                local_colour
-            }).sum();
+            let colour: Colour = (0..SAMPLES_PER_PIXEL)
+                .into_par_iter()
+                .map(|_| {
+                    let u = (i as F + random()) / (IMAGE_WIDTH - 1) as F;
+                    let v = (j as F + random()) / (IMAGE_HEIGHT - 1) as F;
+                    let ray = camera.get_ray(u, v);
+                    let local_colour = ray_colour(&ray, &world, MAX_DEPTH);
+                    local_colour
+                })
+                .sum();
             write!(f, "\n{}", colour.write_colour(SAMPLES_PER_PIXEL))?;
         }
     }
