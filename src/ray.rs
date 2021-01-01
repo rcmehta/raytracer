@@ -3,11 +3,12 @@ use crate::{hittable::*, vec3::*};
 pub struct Ray {
     origin: Vec3,
     direction: Vec3,
+    time: F,
 }
 
 impl Ray {
-    pub fn new(origin: Vec3, direction: Vec3) -> Ray {
-        Ray { origin, direction }
+    pub fn new(origin: Vec3, direction: Vec3, time: F) -> Ray {
+        Ray { origin, direction, time }
     }
 
     pub fn origin(&self) -> Vec3 {
@@ -16,6 +17,10 @@ impl Ray {
 
     pub fn direction(&self) -> Vec3 {
         self.direction
+    }
+
+    pub fn time(&self) -> F {
+        self.time
     }
 
     pub fn at(&self, t: F) -> Vec3 {

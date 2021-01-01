@@ -8,6 +8,8 @@ pub struct Camera {
     u: Vec3,
     v: Vec3,
     lens_radius: F,
+    time0: F,   // shutter open
+    time1: F,   // shutter close
 }
 
 impl Camera {
@@ -19,6 +21,8 @@ impl Camera {
         aspect_ratio: F,
         aperture: F,
         focus_distance: F,
+        time0: F,
+        time1: F,
     ) -> Camera {
         let theta = deg_to_rad(vertical_fov);
         let h = (theta / 2.0).tan();
@@ -44,6 +48,8 @@ impl Camera {
             u,
             v,
             lens_radius,
+            time0,
+            time1,
         }
     }
 
@@ -55,6 +61,7 @@ impl Camera {
             self.origin + offset,
             self.lower_left_corner + self.horizontal * s + self.vertical * t
                 - (self.origin + offset),
+            random_range(self.time0, self.time1),
         )
     }
 }
