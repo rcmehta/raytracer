@@ -15,7 +15,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _ray_in: &Ray, hit_record: &mut HitRecord) -> (bool, Ray, Colour) {
+    fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> (bool, Ray, Colour) {
         let mut scatter_direction = hit_record.n() + Vec3::random_on_unit_sphere();
 
         // Catch degenerate scatter direction
@@ -23,7 +23,7 @@ impl Material for Lambertian {
             scatter_direction = hit_record.n();
         }
 
-        let ray_scattered = Ray::new(hit_record.p(), scatter_direction);
+        let ray_scattered = Ray::new(hit_record.p(), scatter_direction, ray_in.time());
         let attentuation = self.albedo;
 
         (true, ray_scattered, attentuation)
@@ -49,6 +49,7 @@ impl Material for Metal {
         let ray_scattered = Ray::new(
             hit_record.p(),
             reflected + Vec3::random_on_unit_sphere() * self.fuzz,
+            ray_in.time(),
         );
         let attentuation = self.albedo;
 
@@ -96,7 +97,7 @@ impl Material for Dielectric {
             direction = refract(unit_direction, hit_record.n(), refractive_ratio);
         }
 
-        let ray_scattered = Ray::new(hit_record.p(), direction);
+        let ray_scattered = Ray::new(hit_record.p(), direction, ray_in.time());
         let attentuation = Colour::new(1.0, 1.0, 1.0);
 
         (true, ray_scattered, attentuation)
