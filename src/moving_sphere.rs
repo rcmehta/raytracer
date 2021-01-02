@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{hittable::*, ray::Ray, vec3::*};
+use crate::{aabb::AABB, hittable::*, ray::Ray, vec3::*};
 
 pub struct MovingSphere {
     centre0: Point3, centre1: Point3,
@@ -52,5 +52,20 @@ impl Hittable for MovingSphere {
         hit_record.set_face_normal(ray, outward_normal);
 
         Some(hit_record)
+    }
+
+    fn bounding_box(&self, time0: F, time1: F) -> Option<AABB> {
+        let radius_vector = Vec3::new(self.radius, self.radius, self.radius);
+
+        let box0 = AABB::new(
+            self.centre(time0) - radius_vector,
+            self.centre(time1) + radius_vector,
+        );
+        let box1 = AABB::new(
+            self.centre(time1) - radius_vector,
+            self.centre(time1) + radius_vector,
+        );
+
+        Some(AABB::surrounding_box(box0, box1))
     }
 }
