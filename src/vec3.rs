@@ -9,22 +9,24 @@ pub type Colour = Vec3;
 pub type Point3 = Vec3;
 
 #[derive(Copy, Clone)]
-pub struct Vec3(F, F, F);
+pub struct Vec3{
+    x: F, y: F, z: F,
+}
 
 impl Vec3 {
-    pub fn new(x: F, y: F, z: F) -> Vec3 {
-        Vec3(x, y, z)
+    pub fn new(x: F, y: F, z: F) -> Self {
+        Vec3 { x, y, z }
     }
 
-    pub fn random_vector(min: F, max: F) -> Vec3 {
-        Vec3(
+    pub fn random_vector(min: F, max: F) -> Self {
+        Vec3::new(
             random_range(min, max),
             random_range(min, max),
             random_range(min, max),
         )
     }
 
-    pub fn random_on_unit_sphere() -> Vec3 {
+    pub fn random_on_unit_sphere() -> Self {
         loop {
             let vec = Vec3::new(random_gaussian(), random_gaussian(), random_gaussian());
             if vec.length_squared() > 0.0 {
@@ -33,7 +35,7 @@ impl Vec3 {
         }
     }
 
-    pub fn random_in_unit_disc() -> Vec3 {
+    pub fn random_in_unit_disc() -> Self {
         loop {
             let vec = Vec3::new(random_range(-1.0, 1.0), random_range(-1.0, 1.0), 0.0);
             if vec.length_squared() < 1.0 {
@@ -43,15 +45,15 @@ impl Vec3 {
     }
 
     pub fn x(&self) -> F {
-        self.0
+        self.x
     }
 
     pub fn y(&self) -> F {
-        self.1
+        self.y
     }
 
     pub fn z(&self) -> F {
-        self.2
+        self.z
     }
 
     pub fn near_zero(&self) -> bool {
@@ -75,22 +77,22 @@ impl Vec3 {
         let scale = 1.0 / samples_per_pixel as F;
         // Divide colour by number of samples and gamma-correct for gamma = 2.0
         let colour = Vec3::new(
-            (self.0 * scale).sqrt(),
-            (self.1 * scale).sqrt(),
-            (self.2 * scale).sqrt(),
+            (self.x * scale).sqrt(),
+            (self.y * scale).sqrt(),
+            (self.z * scale).sqrt(),
         );
         format!(
             "{} {} {}",
-            (clamp(colour.0, 0.0, 0.999) * 256.0).floor(),
-            (clamp(colour.1, 0.0, 0.999) * 256.0).floor(),
-            (clamp(colour.2, 0.0, 0.999) * 256.0).floor()
+            (clamp(colour.x, 0.0, 0.999) * 256.0).floor(),
+            (clamp(colour.y, 0.0, 0.999) * 256.0).floor(),
+            (clamp(colour.z, 0.0, 0.999) * 256.0).floor()
         )
     }
 }
 
 impl Display for Vec3 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{} {} {}", self.0, self.1, self.2)
+        write!(f, "{} {} {}", self.x, self.y, self.z)
     }
 }
 
@@ -98,7 +100,7 @@ impl Add for Vec3 {
     type Output = Vec3;
 
     fn add(self, other: Self) -> Self {
-        Vec3(self.0 + other.0, self.1 + other.1, self.2 + other.2)
+        Vec3::new(self.x + other.x, self.x + other.y, self.z + other.z)
     }
 }
 
@@ -106,7 +108,7 @@ impl Sub for Vec3 {
     type Output = Vec3;
 
     fn sub(self, other: Self) -> Self {
-        Vec3(self.0 - other.0, self.1 - other.1, self.2 - other.2)
+        Vec3::new(self.x - other.x, self.y - other.y, self.z - other.z)
     }
 }
 
@@ -114,7 +116,7 @@ impl Neg for Vec3 {
     type Output = Vec3;
 
     fn neg(self) -> Self {
-        Vec3(-self.0, -self.1, -self.2)
+        Vec3::new(-self.x, -self.y, -self.z)
     }
 }
 
@@ -122,7 +124,7 @@ impl Mul<Vec3> for Vec3 {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
-        Vec3(self.0 * other.0, self.1 * other.1, self.2 * other.2)
+        Vec3::new(self.x * other.x, self.y * other.y, self.z * other.z)
     }
 }
 
@@ -130,7 +132,7 @@ impl Mul<F> for Vec3 {
     type Output = Self;
 
     fn mul(self, lambda: F) -> Self {
-        Vec3(self.0 * lambda, self.1 * lambda, self.2 * lambda)
+        Vec3::new(self.x * lambda, self.y * lambda, self.z * lambda)
     }
 }
 
@@ -141,7 +143,7 @@ impl Div<F> for Vec3 {
         if lambda == 0.0 {
             panic!("Cannot divide by zero.");
         }
-        Vec3(self.0 / lambda, self.1 / lambda, self.2 / lambda)
+        Vec3::new(self.x / lambda, self.y / lambda, self.z / lambda)
     }
 }
 
@@ -150,22 +152,22 @@ impl Sum<Vec3> for Vec3 {
     where
         I: Iterator<Item = Vec3>,
     {
-        iter.fold(Vec3(0.0, 0.0, 0.0), |u, v| {
-            Vec3(u.x() + v.x(), u.y() + v.y(), u.z() + v.z())
+        iter.fold(Vec3::new(0.0, 0.0, 0.0), |u, v| {
+            Vec3::new(u.x() + v.x(), u.y() + v.y(), u.z() + v.z())
         })
     }
 }
 
 pub fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
-    Vec3(
-        (u.1 * v.2) - (u.2 * v.1),
-        (u.2 * v.0) - (u.0 * v.2),
-        (u.0 * v.1) - (u.1 * v.0),
+    Vec3::new(
+        (u.y * v.z) - (u.z * v.y),
+        (u.z * v.x) - (u.x * v.z),
+        (u.x * v.y) - (u.y * v.x),
     )
 }
 
 pub fn dot(u: &Vec3, v: &Vec3) -> F {
-    (u.0 * v.0) + (u.1 * v.1) + (u.2 * v.2)
+    (u.x * v.x) + (u.y * v.y) + (u.z * v.z)
 }
 
 pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
