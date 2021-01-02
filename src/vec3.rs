@@ -16,6 +16,10 @@ impl Vec3 {
         Vec3([x, y, z])
     }
 
+    pub fn ix(&self, i: usize) -> F {
+        self.0[i]
+    }
+
     pub fn random_vector(min: F, max: F) -> Self {
         Vec3::new(
             random_range(min, max),
@@ -91,12 +95,6 @@ impl Vec3 {
 impl Display for Vec3 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{} {} {}", self.x(), self.y(), self.z())
-    }
-}
-
-impl Into<[F; 3]> for Vec3 {
-    fn into(self) -> [F; 3] {
-        self.0
     }
 }
 
