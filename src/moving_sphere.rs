@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{aabb::AABB, hittable::*, ray::Ray, vec3::*};
+use crate::{aabb::AABB, hittable::*, ray::Ray, sphere::Sphere, vec3::*};
 
 pub struct MovingSphere {
     centre0: Point3, centre1: Point3,
@@ -47,8 +47,9 @@ impl Hittable for MovingSphere {
 
         let p = ray.at(root);
         let outward_normal = (p - self.centre(ray.time())) / self.radius;
+        let tp = Sphere::tp(outward_normal);
         let mut hit_record =
-            HitRecord::new(p, outward_normal, root, true, Arc::clone(&self.material));
+            HitRecord::new(p, outward_normal, root, tp, true, Arc::clone(&self.material));
         hit_record.set_face_normal(ray, outward_normal);
 
         Some(hit_record)

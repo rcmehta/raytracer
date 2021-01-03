@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
-use crate::{aabb::AABB, material::*, ray::*, vec3::*};
+use crate::{aabb::AABB, material::*, ray::*, texture::*, vec3::*};
 
 pub type H = dyn Hittable + Send + Sync;
 pub type M = dyn Material + Send + Sync;
+pub type T = dyn Texture + Send + Sync;
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: F, t_max: F) -> Option<HitRecord>;
@@ -14,16 +15,18 @@ pub struct HitRecord {
     p: Point3,
     n: Vec3,
     t: F,
+    tp: TexturePoint,
     front_face: bool,
     material: Arc<M>,
 }
 
 impl HitRecord {
-    pub fn new(p: Point3, n: Vec3, t: F, front_face: bool, material: Arc<M>) -> HitRecord {
+    pub fn new(p: Point3, n: Vec3, t: F, tp: TexturePoint, front_face: bool, material: Arc<M>) -> HitRecord {
         HitRecord {
             p,
             n,
             t,
+            tp,
             front_face,
             material,
         }
@@ -37,6 +40,10 @@ impl HitRecord {
     }
     pub fn t(&self) -> F {
         self.t
+    }
+
+    pub fn tp(&self) -> TexturePoint {
+        self.tp
     }
     pub fn front_face(&self) -> bool {
         self.front_face

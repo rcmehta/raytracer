@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{aabb::AABB, hittable::*, ray::*, vec3::*};
+use crate::{aabb::AABB, hittable::*, ray::*, texture::*, vec3::*};
 
 pub struct Sphere {
     centre: Point3,
@@ -23,6 +23,25 @@ impl Sphere {
 
     pub fn _radius(&self) -> F {
         self.radius
+    }
+
+    pub fn tp(p: Point3) -> TexturePoint {
+        // p: a given point on the sphere of radius one, centered at the origin.
+        // u: returned value [0,1] of angle around the Y axis from X=-1.
+        // v: returned value [0,1] of angle from Y=-1 to Y=+1.
+        //     <1 0 0> yields <0.50 0.50>       <-1  0  0> yields <0.00 0.50>
+        //     <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
+        //     <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
+        
+        const PI: F = std::f64::consts::PI;
+
+        let theta = (-p.y()).acos();
+        let phi = (-p.z()).atan2(-p.x()) + PI;
+
+        let u = phi / (2.0 * PI);
+        let v = theta / PI;
+
+        TexturePoint::new(u, v)
     }
 }
 
@@ -49,8 +68,9 @@ impl Hittable for Sphere {
 
         let p = ray.at(root);
         let outward_normal = (p - self.centre) / self.radius;
+        let tp = Sphere::tp(outward_normal);
         let mut hit_record =
-            HitRecord::new(p, outward_normal, root, true, Arc::clone(&self.material));
+            HitRecord::new(p, outward_normal, root, tp, true, Arc::clone(&self.material));
         hit_record.set_face_normal(ray, outward_normal);
 
         Some(hit_record)
