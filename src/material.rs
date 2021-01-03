@@ -1,16 +1,22 @@
-use crate::{hittable::*, ray::*, vec3::*};
+use std::sync::Arc;
+
+use crate::{hittable::*, ray::*, texture::*, vec3::*};
 
 pub trait Material {
     fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> (bool, Ray, Colour);
 }
 
 pub struct Lambertian {
-    albedo: Colour,
+    albedo: Arc<T>,
 }
 
 impl Lambertian {
-    pub fn new(albedo: Colour) -> Lambertian {
+    pub fn new(albedo: Arc<T>) -> Self {
         Lambertian { albedo }
+    }
+
+    pub fn colour(colour: Colour) -> Self {
+        Lambertian { albedo: Arc::new(SolidColour::new(colour)) }
     }
 }
 
@@ -24,7 +30,7 @@ impl Material for Lambertian {
         }
 
         let ray_scattered = Ray::new(hit_record.p(), scatter_direction, ray_in.time());
-        let attentuation = self.albedo;
+        let attentuation = self.albedo.value(hit_record.tp(), hit_record.p());
 
         (true, ray_scattered, attentuation)
     }

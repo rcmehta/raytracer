@@ -7,36 +7,18 @@ use rayon::prelude::*;
 
 use std::{error::Error, fs, io::Write, sync::Arc};
 
-use raytracer::{camera::*, hittable::*, material::*, moving_sphere::*, ray::*, sphere::*, vec3::*};
+use raytracer::{camera::*, hittable::*, material::*, moving_sphere::*, ray::*, sphere::*, texture::*, vec3::*};
+
+// Image Constants
+const ASPECT_RATIO: F = 16.0 / 9.0;
+const IMAGE_HEIGHT: u32 = 720;
+const IMAGE_WIDTH: u32 = (IMAGE_HEIGHT as F * ASPECT_RATIO) as u32;
+const SAMPLES_PER_PIXEL: u32 = 100;
+const MAX_DEPTH: u32 = 50;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    // Image Constants
-    const ASPECT_RATIO: F = 16.0 / 9.0;
-    const IMAGE_HEIGHT: u32 = 360;
-    const IMAGE_WIDTH: u32 = (IMAGE_HEIGHT as F * ASPECT_RATIO) as u32;
-    const SAMPLES_PER_PIXEL: u32 = 100;
-    const MAX_DEPTH: u32 = 50;
-
-    // World
-    let world = random_scene();
-
-    // Camera
-    let look_from = Point3::new(13.0, 2.0, 3.0);
-    let look_at = Point3::new(0.0, 0.0, 0.0);
-    let v_up = Point3::new(0.0, 1.0, 0.0);
-    let distance_to_focus = 10.0;
-    let aperture = 0.1;
-
-    let camera = Camera::new(
-        look_from,
-        look_at,
-        v_up,
-        20.0,
-        ASPECT_RATIO,
-        aperture,
-        distance_to_focus,
-        0.0, 1.0,
-    );
+    // Camera, World
+    let (camera, world) = _two_spheres();
 
     // Create and initialise .ppm file
     let name = "image".to_string();
@@ -75,10 +57,31 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn random_scene() -> HittableList {
+fn _random_scene() -> (Camera, HittableList) {
+    let look_from = Point3::new(13.0, 2.0, 3.0);
+    let look_at = Point3::new(0.0, 0.0, 0.0);
+    let v_up = Point3::new(0.0, 1.0, 0.0);
+    let distance_to_focus = 10.0;
+    let aperture = 0.1;
+
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        v_up,
+        20.0,
+        ASPECT_RATIO,
+        aperture,
+        distance_to_focus,
+        0.0, 1.0,
+    );
+
     let mut world = HittableList::new();
 
-    let ground_material = Arc::new(Lambertian::new(Colour::new(0.5, 0.5, 0.5)));
+    let ground_texture = Arc::new(Checkered::new(
+        Arc::new(SolidColour::rgb(0.2, 0.3, 0.1)),
+        Arc::new(SolidColour::rgb(0.9, 0.9, 0.9)),
+    ));
+    let ground_material = Arc::new(Lambertian::new(ground_texture));
     world.add(Arc::new(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
@@ -95,7 +98,7 @@ fn random_scene() -> HittableList {
                 if choose_material < 0.8 {
                     // diffuse
                     let albedo = Colour::random_vector(0.0, 1.0) * Colour::random_vector(0.0, 1.0);
-                    sphere_material = Arc::new(Lambertian::new(albedo));
+                    sphere_material = Arc::new(Lambertian::colour(albedo));
                     
                     let centre1 = centre + Vec3::new(0.0, random_range(0.0, 0.5), 0.0);
                     world.add(Arc::new(MovingSphere::new(centre, centre1, 0.0, 1.0, 0.2, sphere_material)));
@@ -115,7 +118,7 @@ fn random_scene() -> HittableList {
         }
     }
 
-    let lambertian = Arc::new(Lambertian::new(Colour::new(0.4, 0.2, 0.1)));
+    let lambertian = Arc::new(Lambertian::colour(Colour::new(0.4, 0.2, 0.1)));
     world.add(Arc::new(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
@@ -136,5 +139,46 @@ fn random_scene() -> HittableList {
         metal,
     )));
 
-    world
+    (camera, world)
+}
+
+fn _two_spheres() -> (Camera, HittableList) {
+    let look_from = Point3::new(13.0, 2.0, 3.0);
+    let look_at = Point3::new(0.0, 0.0, 0.0);
+    let v_up = Point3::new(0.0, 1.0, 0.0);
+    let distance_to_focus = 10.0;
+    let aperture = 0.0;
+
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        v_up,
+        20.0,
+        ASPECT_RATIO,
+        aperture,
+        distance_to_focus,
+        0.0, 1.0,
+    );
+
+    let mut world = HittableList::new();
+
+    let checkered = Arc::new(Checkered::colour(
+        Colour::new(0.2, 0.3, 0.1),
+        Colour::new(0.9, 0.9, 0.9),
+    ));
+
+    let material: Arc<M> = Arc::new(Lambertian::new(checkered));
+
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, -10.0, 0.0),
+        10.0,
+        Arc::clone(&material),
+    )));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 10.0, 0.0),
+        10.0,
+        Arc::clone(&material),
+    )));
+
+    (camera, world)
 }
