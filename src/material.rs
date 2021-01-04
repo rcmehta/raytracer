@@ -104,7 +104,7 @@ impl Material for Dielectric {
         }
 
         let ray_scattered = Ray::new(hit_record.p(), direction, ray_in.time());
-        let attentuation = Colour::new(1.0, 1.0, 1.0);
+        let attentuation = Colour::one();
 
         (true, ray_scattered, attentuation)
     }

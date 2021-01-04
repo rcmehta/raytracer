@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{hittable::T, vec3::*};
+use crate::{hittable::T, perlin::*, vec3::*};
 
 pub trait Texture {
     fn value(&self, tp: TexturePoint, p: Point3) -> Colour;
@@ -69,5 +69,23 @@ impl Texture for Checkered {
         } else {
             self.even.value(tp, p)
         }
+    }
+}
+
+pub struct Noise {
+    noise: Perlin,
+    scale: F,
+}
+
+impl Noise {
+    pub fn new(scale: F) -> Self {
+        Self { noise: Perlin::new(), scale }
+    }
+}
+
+impl Texture for Noise {
+    fn value(&self, _tp: TexturePoint, p: Point3) -> Colour {
+        Colour::new(0.18, 0.1, 0.28) * 0.5 * 
+        (1.0 + (self.scale * p.z() + 10.0  * self.noise.turbulence(p * self.scale, 7)).sin())
     }
 }
