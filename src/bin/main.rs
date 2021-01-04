@@ -18,7 +18,7 @@ const MAX_DEPTH: u32 = 50;
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Camera, World
-    let (camera, world) = _two_perlin_spheres();
+    let (camera, world) = _earth();
 
     // Create and initialise .ppm file
     let name = "image".to_string();
@@ -215,6 +215,38 @@ fn _two_perlin_spheres() -> (Camera, HittableList) {
         Point3::new(0.0, 2.0, 0.0),
         2.0,
         Arc::clone(&material),
+    )));
+
+    (camera, world)
+}
+
+fn _earth() -> (Camera, HittableList) {
+    let look_from = Point3::new(13.0, 2.0, 3.0);
+    let look_at = Point3::zero();
+    let v_up = Point3::new(0.0, 1.0, 0.0);
+    let distance_to_focus = 10.0;
+    let aperture = 0.0;
+
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        v_up,
+        20.0,
+        ASPECT_RATIO,
+        aperture,
+        distance_to_focus,
+        0.0, 1.0,
+    );
+
+    let mut world = HittableList::new();
+
+    let earth = Arc::new(Image::new("textures/earthmap.jpg"));
+    let material: Arc<M> = Arc::new(Lambertian::new(earth));
+
+    world.add(Arc::new(Sphere::new(
+        Point3::zero(),
+        2.0,
+        material,
     )));
 
     (camera, world)
