@@ -18,7 +18,7 @@ const MAX_DEPTH: u32 = 50;
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Camera, World
-    let (camera, world) = _two_spheres();
+    let (camera, world) = _two_perlin_spheres();
 
     // Create and initialise .ppm file
     let name = "image".to_string();
@@ -59,7 +59,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn _random_scene() -> (Camera, HittableList) {
     let look_from = Point3::new(13.0, 2.0, 3.0);
-    let look_at = Point3::new(0.0, 0.0, 0.0);
+    let look_at = Point3::zero();
     let v_up = Point3::new(0.0, 1.0, 0.0);
     let distance_to_focus = 10.0;
     let aperture = 0.1;
@@ -144,7 +144,7 @@ fn _random_scene() -> (Camera, HittableList) {
 
 fn _two_spheres() -> (Camera, HittableList) {
     let look_from = Point3::new(13.0, 2.0, 3.0);
-    let look_at = Point3::new(0.0, 0.0, 0.0);
+    let look_at = Point3::zero();
     let v_up = Point3::new(0.0, 1.0, 0.0);
     let distance_to_focus = 10.0;
     let aperture = 0.0;
@@ -177,6 +177,43 @@ fn _two_spheres() -> (Camera, HittableList) {
     world.add(Arc::new(Sphere::new(
         Point3::new(0.0, 10.0, 0.0),
         10.0,
+        Arc::clone(&material),
+    )));
+
+    (camera, world)
+}
+
+fn _two_perlin_spheres() -> (Camera, HittableList) {
+    let look_from = Point3::new(13.0, 2.0, 3.0);
+    let look_at = Point3::zero();
+    let v_up = Point3::new(0.0, 1.0, 0.0);
+    let distance_to_focus = 10.0;
+    let aperture = 0.0;
+
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        v_up,
+        20.0,
+        ASPECT_RATIO,
+        aperture,
+        distance_to_focus,
+        0.0, 1.0,
+    );
+
+    let mut world = HittableList::new();
+
+    let perlin = Arc::new(Noise::new(4.0));
+    let material: Arc<M> = Arc::new(Lambertian::new(perlin));
+
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Arc::clone(&material),
+    )));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 2.0, 0.0),
+        2.0,
         Arc::clone(&material),
     )));
 

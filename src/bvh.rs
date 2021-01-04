@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::{thread_rng, Rng};
 use std::sync::Arc;
 
 use crate::{aabb::AABB, hittable::*, ray::Ray, vec3::*};
@@ -16,7 +16,7 @@ impl BVH {
 
         let objects = src_objects.clone();
 
-        let mut rng = rand::thread_rng();
+        let mut rng = thread_rng();
         let axis = rng.gen_range(0, 3) as usize;
 
         let object_span = end - start;

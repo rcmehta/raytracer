@@ -16,6 +16,14 @@ impl Vec3 {
         Vec3([x, y, z])
     }
 
+    pub fn zero() -> Self {
+        Vec3([0.0, 0.0, 0.0])
+    }
+
+    pub fn one() -> Self {
+        Vec3([1.0, 1.0, 1.0])
+    }
+
     pub fn ix(&self, i: usize) -> F {
         self.0[i]
     }
@@ -98,7 +106,7 @@ impl Display for Vec3 {
     }
 }
 
-impl Add for Vec3 {
+impl Add<Vec3> for Vec3 {
     type Output = Vec3;
 
     fn add(self, other: Self) -> Self {
@@ -106,11 +114,27 @@ impl Add for Vec3 {
     }
 }
 
-impl Sub for Vec3 {
+impl Add<F> for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, other: F) -> Self {
+        Vec3::new(self.x() + other, self.y() + other, self.z() + other)
+    }
+}
+
+impl Sub<Vec3> for Vec3 {
     type Output = Vec3;
 
     fn sub(self, other: Self) -> Self {
         Vec3::new(self.x() - other.x(), self.y() - other.y(), self.z() - other.z())
+    }
+}
+
+impl Sub<F> for Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, other: F) -> Self {
+        Vec3::new(self.x() - other, self.y() - other, self.z() - other)
     }
 }
 
