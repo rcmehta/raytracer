@@ -36,7 +36,7 @@ impl Sphere {
         const PI: F = std::f64::consts::PI;
 
         let theta = (-p.y()).acos();
-        let phi = (-p.z()).atan2(-p.x()) + PI;
+        let phi = (-p.z()).atan2(p.x()) + PI;
 
         let u = phi / (2.0 * PI);
         let v = theta / PI;
