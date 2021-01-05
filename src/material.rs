@@ -3,7 +3,32 @@ use std::sync::Arc;
 use crate::{hittable::*, ray::*, texture::*, vec3::*};
 
 pub trait Material {
-    fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> (bool, Ray, Colour);
+    fn scatter(&self, _ray_in: &Ray, _hit_record: &mut HitRecord) -> Option<ScatterRecord> {
+        None
+    }
+
+    fn emit(&self, _tp: TexturePoint, _p: Point3) -> Colour {
+        Colour::zero()
+    }
+}
+
+pub struct ScatterRecord {
+    ray: Ray,
+    colour: Colour,
+}
+
+impl ScatterRecord {
+    pub fn new(ray: Ray, colour: Colour) -> Self {
+        Self { ray, colour } 
+    }
+
+    pub fn ray(&self) -> &Ray {
+        &self.ray
+    }
+
+    pub fn colour(&self) -> Colour {
+        self.colour
+    }
 }
 
 pub struct Lambertian {
@@ -21,7 +46,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> (bool, Ray, Colour) {
+    fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> Option<ScatterRecord> {
         let mut scatter_direction = hit_record.n() + Vec3::random_on_unit_sphere();
 
         // Catch degenerate scatter direction
@@ -32,7 +57,8 @@ impl Material for Lambertian {
         let ray_scattered = Ray::new(hit_record.p(), scatter_direction, ray_in.time());
         let attentuation = self.albedo.value(hit_record.tp(), hit_record.p());
 
-        (true, ray_scattered, attentuation)
+        let scatter_record = ScatterRecord::new(ray_scattered, attentuation);
+        Some(scatter_record)
     }
 }
 
@@ -49,7 +75,7 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> (bool, Ray, Colour) {
+    fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> Option<ScatterRecord> {
         let reflected = reflect(ray_in.direction(), hit_record.n());
 
         let ray_scattered = Ray::new(
@@ -59,11 +85,13 @@ impl Material for Metal {
         );
         let attentuation = self.albedo;
 
-        (
-            dot(&ray_scattered.direction(), &hit_record.n()) > 0.0,
-            ray_scattered,
-            attentuation,
-        )
+        if dot(&ray_scattered.direction(), &hit_record.n()) > 0.0 {
+            let scatter_record = ScatterRecord::new(ray_scattered, attentuation);
+            Some(scatter_record)
+        } else {
+            None
+        }
+            
     }
 }
 
@@ -83,7 +111,7 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> (bool, Ray, Colour) {
+    fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> Option<ScatterRecord> {
         let refractive_ratio = if hit_record.front_face() {
             1.0 / self.refractive_index
         } else {
@@ -106,6 +134,23 @@ impl Material for Dielectric {
         let ray_scattered = Ray::new(hit_record.p(), direction, ray_in.time());
         let attentuation = Colour::one();
 
-        (true, ray_scattered, attentuation)
+        let scatter_record = ScatterRecord::new(ray_scattered, attentuation);
+        Some(scatter_record)
+    }
+}
+
+pub struct DiffuseLight {
+    emit: Arc<T>,
+}
+
+impl DiffuseLight {
+    pub fn new(emit: Arc<T>) -> Self {
+        Self { emit }
+    }
+}
+
+impl Material for DiffuseLight {
+    fn emit(&self, tp: TexturePoint, p: Point3) -> Colour {
+        self.emit.value(tp, p)
     }
 }

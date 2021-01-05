@@ -28,20 +28,20 @@ impl Ray {
     }
 }
 
-pub fn ray_colour(ray_in: &Ray, world: &HittableList, depth: u32) -> Colour {
+pub fn ray_colour(ray_in: &Ray, background: Colour, world: &HittableList, depth: u32) -> Colour {
     if depth <= 0 {
         Colour::zero()
     } else if let Some(mut hit_record) = world.hit(ray_in, 0.001, f64::INFINITY) {
-        if let (true, ray_scattered, attentuation) =
+        let emitted = hit_record.material().emit(hit_record.tp(), hit_record.p());
+
+        if let Some(scatter_record) =
             hit_record.material().scatter(ray_in, &mut hit_record)
         {
-            ray_colour(&ray_scattered, world, depth - 1) * attentuation
+            emitted + ray_colour(scatter_record.ray(), background, world, depth - 1) * scatter_record.colour()
         } else {
-            Colour::zero()
+            emitted
         }
     } else {
-        let unit_direction = ray_in.direction().unit();
-        let t = (unit_direction.y() + 1.0) * 0.5;
-        Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.5, 0.7, 1.0) * t
+        background
     }
 }
