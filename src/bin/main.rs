@@ -20,6 +20,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Camera, World
     let (camera, world) = _earth();
 
+    // Background
+    let background = Colour::new(0.7, 0.8, 1.0);
+
     // Create and initialise .ppm file
     let name = "image".to_string();
     let ppm_path = name + ".ppm";
@@ -36,7 +39,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     let u = (i as F + random()) / (IMAGE_WIDTH - 1) as F;
                     let v = (j as F + random()) / (IMAGE_HEIGHT - 1) as F;
                     let ray = camera.get_ray(u, v);
-                    let local_colour = ray_colour(&ray, &world, MAX_DEPTH);
+                    let local_colour = ray_colour(&ray, background, &world, MAX_DEPTH);
                     local_colour
                 })
                 .sum();
