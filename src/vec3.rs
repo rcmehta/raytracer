@@ -28,6 +28,16 @@ impl Vec3 {
         self.0[i]
     }
 
+    pub fn set(&mut self, i: usize, val: F) {
+        self.0[i] = val;
+    }
+
+    pub fn set_all(&mut self, (i, j, k): (usize, usize, usize), (x, y, z): (F, F, F)) {
+        self.0[i] = x;
+        self.0[j] = y;
+        self.0[k] = z;
+    }
+
     pub fn random_vector(min: F, max: F) -> Self {
         Vec3::new(
             random_range(min, max),

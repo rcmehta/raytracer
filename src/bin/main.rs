@@ -7,21 +7,21 @@ use rayon::prelude::*;
 
 use std::{error::Error, fs, io::Write, sync::Arc};
 
-use raytracer::{camera::*, hittable::*, material::*, moving_sphere::*, ray::*, sphere::*, texture::*, vec3::*};
+use raytracer::{aarect::*, camera::*, hittable::*, material::*, moving_sphere::*, ray::*, sphere::*, texture::*, vec3::*};
 
 // Image Constants
-const ASPECT_RATIO: F = 16.0 / 9.0;
-const IMAGE_HEIGHT: u32 = 720;
+const ASPECT_RATIO: F = 1.0;
+const IMAGE_HEIGHT: u32 = 600;
 const IMAGE_WIDTH: u32 = (IMAGE_HEIGHT as F * ASPECT_RATIO) as u32;
-const SAMPLES_PER_PIXEL: u32 = 100;
+const SAMPLES_PER_PIXEL: u32 = 500;
 const MAX_DEPTH: u32 = 50;
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Camera, World
-    let (camera, world) = _earth();
+    let (camera, world) = _cornell_box();
 
     // Background
-    let background = Colour::new(0.7, 0.8, 1.0);
+    let background = Colour::new(0.0, 0.0, 0.0);
 
     // Create and initialise .ppm file
     let name = "image".to_string();
@@ -60,9 +60,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn _random_scene() -> (Camera, HittableList) {
+pub fn default_camera() -> Camera {
     let look_from = Point3::new(13.0, 2.0, 3.0);
     let look_at = Point3::zero();
+    let vfov = 20.0;
     let v_up = Point3::new(0.0, 1.0, 0.0);
     let distance_to_focus = 10.0;
     let aperture = 0.1;
@@ -71,13 +72,17 @@ fn _random_scene() -> (Camera, HittableList) {
         look_from,
         look_at,
         v_up,
-        20.0,
+        vfov,
         ASPECT_RATIO,
         aperture,
         distance_to_focus,
         0.0, 1.0,
     );
 
+    camera
+}
+
+fn _random_scene() -> (Camera, HittableList) {
     let mut world = HittableList::new();
 
     let ground_texture = Arc::new(Checkered::new(
@@ -142,27 +147,10 @@ fn _random_scene() -> (Camera, HittableList) {
         metal,
     )));
 
-    (camera, world)
+    (default_camera(), world)
 }
 
 fn _two_spheres() -> (Camera, HittableList) {
-    let look_from = Point3::new(13.0, 2.0, 3.0);
-    let look_at = Point3::zero();
-    let v_up = Point3::new(0.0, 1.0, 0.0);
-    let distance_to_focus = 10.0;
-    let aperture = 0.0;
-
-    let camera = Camera::new(
-        look_from,
-        look_at,
-        v_up,
-        20.0,
-        ASPECT_RATIO,
-        aperture,
-        distance_to_focus,
-        0.0, 1.0,
-    );
-
     let mut world = HittableList::new();
 
     let checkered = Arc::new(Checkered::colour(
@@ -183,12 +171,48 @@ fn _two_spheres() -> (Camera, HittableList) {
         Arc::clone(&material),
     )));
 
-    (camera, world)
+    (default_camera(), world)
 }
 
 fn _two_perlin_spheres() -> (Camera, HittableList) {
-    let look_from = Point3::new(13.0, 2.0, 3.0);
-    let look_at = Point3::zero();
+    let mut world = HittableList::new();
+
+    let perlin = Arc::new(Noise::new(4.0));
+    let material: Arc<M> = Arc::new(Lambertian::new(perlin));
+
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Arc::clone(&material),
+    )));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 2.0, 0.0),
+        2.0,
+        Arc::clone(&material),
+    )));
+
+    (default_camera(), world)
+}
+
+fn _earth() -> (Camera, HittableList) {
+    let mut world = HittableList::new();
+
+    let earth = Arc::new(Image::new("textures/earthmap.jpg"));
+    let material: Arc<M> = Arc::new(Lambertian::new(earth));
+
+    world.add(Arc::new(Sphere::new(
+        Point3::zero(),
+        2.0,
+        material,
+    )));
+
+    (default_camera(), world)
+}
+
+fn _simple_light() -> (Camera, HittableList) {
+    let look_from = Point3::new(26.0, 3.0, 6.0);
+    let look_at = Point3::new(0.0, 2.0, 0.0);
+    let vfov = 20.0;
     let v_up = Point3::new(0.0, 1.0, 0.0);
     let distance_to_focus = 10.0;
     let aperture = 0.0;
@@ -197,7 +221,7 @@ fn _two_perlin_spheres() -> (Camera, HittableList) {
         look_from,
         look_at,
         v_up,
-        20.0,
+        vfov,
         ASPECT_RATIO,
         aperture,
         distance_to_focus,
@@ -220,13 +244,18 @@ fn _two_perlin_spheres() -> (Camera, HittableList) {
         Arc::clone(&material),
     )));
 
+    let diff_light: Arc<M> = Arc::new(DiffuseLight::colour(Colour::new(4.0, 4.0, 4.0)));
+
+    world.add(Arc::new(AARect::new(Plane::XY, 3.0, 5.0, 1.0, 3.0, -2.0, diff_light)));
+
     (camera, world)
 }
 
-fn _earth() -> (Camera, HittableList) {
-    let look_from = Point3::new(13.0, 2.0, 3.0);
-    let look_at = Point3::zero();
+fn _cornell_box() -> (Camera, HittableList) {
+    let look_from = Point3::new(278.0, 278.0, -800.0);
+    let look_at = Point3::new(278.0, 278.0, 0.0);
     let v_up = Point3::new(0.0, 1.0, 0.0);
+    let vfov = 40.0;
     let distance_to_focus = 10.0;
     let aperture = 0.0;
 
@@ -234,7 +263,7 @@ fn _earth() -> (Camera, HittableList) {
         look_from,
         look_at,
         v_up,
-        20.0,
+        vfov,
         ASPECT_RATIO,
         aperture,
         distance_to_focus,
@@ -243,14 +272,18 @@ fn _earth() -> (Camera, HittableList) {
 
     let mut world = HittableList::new();
 
-    let earth = Arc::new(Image::new("textures/earthmap.jpg"));
-    let material: Arc<M> = Arc::new(Lambertian::new(earth));
+    let red: Arc<M> = Arc::new(Lambertian::colour(Colour::new(0.65, 0.05, 0.05)));
+    let white: Arc<M> = Arc::new(Lambertian::colour(Colour::new(0.73, 0.73, 0.73)));
+    let green: Arc<M> = Arc::new(Lambertian::colour(Colour::new(0.12, 0.45, 0.15)));
 
-    world.add(Arc::new(Sphere::new(
-        Point3::zero(),
-        2.0,
-        material,
-    )));
+    let light: Arc<M> = Arc::new(DiffuseLight::colour(Colour::new(15.0, 15.0, 15.0)));
+
+    world.add(Arc::new(AARect::new(Plane::YZ, 0.0, 555.0, 0.0, 555.0, 555.0, Arc::clone(&green))));
+    world.add(Arc::new(AARect::new(Plane::YZ, 0.0, 555.0, 0.0, 555.0, 0.0, Arc::clone(&red))));
+    world.add(Arc::new(AARect::new(Plane::ZX, 213.0, 343.0, 227.0, 332.0, 554.0, Arc::clone(&light))));
+    world.add(Arc::new(AARect::new(Plane::ZX, 0.0, 555.0, 0.0, 555.0, 0.0, Arc::clone(&white))));
+    world.add(Arc::new(AARect::new(Plane::ZX, 0.0, 555.0, 0.0, 555.0, 555.0, Arc::clone(&white))));
+    world.add(Arc::new(AARect::new(Plane::XY, 0.0, 555.0, 0.0, 555.0, 555.0, Arc::clone(&white))));
 
     (camera, world)
 }
