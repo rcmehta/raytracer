@@ -1,4 +1,5 @@
 pub mod aabb;
+pub mod aarect;
 pub mod bvh;
 pub mod camera;
 pub mod hittable;

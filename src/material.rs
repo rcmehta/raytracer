@@ -147,6 +147,10 @@ impl DiffuseLight {
     pub fn new(emit: Arc<T>) -> Self {
         Self { emit }
     }
+
+    pub fn colour(colour: Colour) -> Self {
+        Self { emit: Arc::new(SolidColour::new(colour))}
+    }
 }
 
 impl Material for DiffuseLight {

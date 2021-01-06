@@ -56,12 +56,8 @@ impl AABB {
             // t0 = (x0 - A0) / B0
             // Similarly for x=x1, use min, max to find range
 
-            let mut t0 =
-                ((self.min.ix(i) - ray.origin().ix(i)) * inv).min
-                ((self.max.ix(i) - ray.origin().ix(i)) * inv);
-            let mut t1 = 
-                ((self.min.ix(i) - ray.origin().ix(i)) * inv).max
-                ((self.max.ix(i) - ray.origin().ix(i)) * inv);
+            let mut t0 = (self.min.ix(i) - ray.origin().ix(i)) * inv;
+            let mut t1 = (self.max.ix(i) - ray.origin().ix(i)) * inv;
 
             if inv < 0.0 {
                 std::mem::swap(&mut t0, &mut t1);
