@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{aabb::AABB, hittable::*, ray::Ray, texture::*, vec3::*};
+use crate::{aabb::*, hittable::*, ray::*, texture::*, vec3::*};
 
 pub enum Plane {
     XY,
@@ -66,16 +66,46 @@ impl Hittable for AARect {
     }
 
     fn bounding_box(&self, _time0: F, _time1: F) -> Option<AABB> {
+        let depth = 1e-4;
         let order = self.axes();
 
         let mut min = Point3::zero();
-        min.set_all(order, (self.a0, self.b0, self.k - 0.001));
+        min.set_all(order, (self.a0, self.b0, self.k - depth));
         let mut max = Point3::zero();
-        max.set_all(order, (self.a1, self.b1, self.k + 0.001)); 
+        max.set_all(order, (self.a1, self.b1, self.k + depth)); 
 
         Some(AABB::new(min, max))
 
     }
 }
+ 
+pub struct AABox {
+    min: Point3,
+    max: Point3,
+    sides: HittableList,
+}
 
+impl AABox {
+    pub fn new(min: Point3, max: Point3, material: Arc<M>) -> Self {
+        let mut sides = HittableList::new();
 
+        sides.add(Arc::new(AARect::new(Plane::XY, min.x(), max.x(), min.y(), max.y(), max.z(), Arc::clone(&material)))); 
+        sides.add(Arc::new(AARect::new(Plane::XY, min.x(), max.x(), min.y(), max.y(), min.z(), Arc::clone(&material)))); 
+        sides.add(Arc::new(AARect::new(Plane::ZX, min.z(), max.z(), min.x(), max.x(), max.y(), Arc::clone(&material))));
+        sides.add(Arc::new(AARect::new(Plane::ZX, min.z(), max.z(), min.x(), max.x(), min.y(), Arc::clone(&material))));
+        sides.add(Arc::new(AARect::new(Plane::YZ, min.y(), max.y(), min.z(), max.z(), max.x(), Arc::clone(&material))));
+        sides.add(Arc::new(AARect::new(Plane::YZ, min.y(), max.y(), min.z(), max.z(), min.x(), Arc::clone(&material))));
+
+        Self { min, max, sides }
+    }
+}
+
+impl Hittable for AABox {
+    fn hit(&self, ray: &Ray, t_min: F, t_max: F) -> Option<HitRecord> {
+        self.sides.hit(ray, t_min, t_max)
+    }
+
+    fn bounding_box(&self, _time0: F, _time1: F) -> Option<AABB> {
+        Some(AABB::new(self.min, self.max))
+    }
+}

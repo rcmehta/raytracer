@@ -7,13 +7,13 @@ use rayon::prelude::*;
 
 use std::{error::Error, fs, io::Write, sync::Arc};
 
-use raytracer::{aarect::*, camera::*, hittable::*, material::*, moving_sphere::*, ray::*, sphere::*, texture::*, vec3::*};
+use raytracer::{aarect::*, camera::*, hittable::*, material::*, moving_sphere::*, ray::*, sphere::*, texture::*, transform::*, vec3::*};
 
 // Image Constants
 const ASPECT_RATIO: F = 1.0;
 const IMAGE_HEIGHT: u32 = 600;
 const IMAGE_WIDTH: u32 = (IMAGE_HEIGHT as F * ASPECT_RATIO) as u32;
-const SAMPLES_PER_PIXEL: u32 = 500;
+const SAMPLES_PER_PIXEL: u32 = 200;
 const MAX_DEPTH: u32 = 50;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -284,6 +284,25 @@ fn _cornell_box() -> (Camera, HittableList) {
     world.add(Arc::new(AARect::new(Plane::ZX, 0.0, 555.0, 0.0, 555.0, 0.0, Arc::clone(&white))));
     world.add(Arc::new(AARect::new(Plane::ZX, 0.0, 555.0, 0.0, 555.0, 555.0, Arc::clone(&white))));
     world.add(Arc::new(AARect::new(Plane::XY, 0.0, 555.0, 0.0, 555.0, 555.0, Arc::clone(&white))));
+
+    let box1 = Arc::new(AABox::new(
+        Point3::zero(),
+        Point3::new(165.0, 330.0, 165.0), 
+        Arc::clone(&white)));
+    let box2 = Arc::new(AABox::new(
+        Point3::zero(),
+        Point3::new(165.0, 165.0, 165.0), 
+        Arc::clone(&white)));
+
+    let box1 = Translate::new(
+        Arc::new(Rotate::new(box1, 15.0)),
+        Vec3::new(265.0, 0.0, 295.0));
+    let box2 = Translate::new(
+        Arc::new(Rotate::new(box2, -18.0)),
+        Vec3::new(130.0, 0.0, 65.0));
+
+    world.add(Arc::new(box1));
+    world.add(Arc::new(box2));
 
     (camera, world)
 }

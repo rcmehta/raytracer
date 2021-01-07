@@ -227,6 +227,10 @@ pub fn clamp(x: F, min: F, max: F) -> F {
     }
 }
 
+pub fn deg_to_rad(deg: F) -> F {
+    deg * std::f64::consts::PI / 180.0
+}
+
 // Random
 pub fn random() -> F {
     thread_rng().gen::<F>()
