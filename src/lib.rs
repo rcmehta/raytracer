@@ -9,4 +9,5 @@ pub mod perlin;
 pub mod ray;
 pub mod sphere;
 pub mod texture;
+pub mod transform;
 pub mod vec3;

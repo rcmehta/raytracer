@@ -65,7 +65,3 @@ impl Camera {
         )
     }
 }
-
-fn deg_to_rad(deg: F) -> F {
-    deg * std::f64::consts::PI / 180.0
-}
