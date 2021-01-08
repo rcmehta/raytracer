@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{aabb::*, hittable::*, ray::*, vec3::*};
+use crate::{aabb::*, aarect::*, hittable::*, ray::*, vec3::*};
 
 pub struct Translate {
     object: Arc<H>,
@@ -35,19 +35,16 @@ impl Hittable for Translate {
     }
 }
 
-
-// Currently only on Y axis
-// TODO - implement for other axes
-
 pub struct Rotate {
     object: Arc<H>,
+    plane: Plane,
     cos_theta: F,
     sin_theta: F,
     bbox: Option<AABB>,
 }
 
 impl Rotate {
-    pub fn new(object: Arc<H>, theta: F) -> Self {
+    pub fn new(object: Arc<H>, plane: Plane, theta: F) -> Self {
         let radians = deg_to_rad(theta);
         let cos_theta = radians.cos();
         let sin_theta = radians.sin();
@@ -81,31 +78,32 @@ impl Rotate {
 
         let bbox = Some(AABB::new(min, max));
 
-        Self { object, sin_theta, cos_theta, bbox }
+        Self { object, plane, sin_theta, cos_theta, bbox }
     }
 }
 
 impl Hittable for Rotate {
     fn hit(&self, ray: &Ray, t_min: F, t_max: F) -> Option<HitRecord> {
+        let (i, j, _k) = self.plane.axes();
         let mut origin = ray.origin();
         let mut direction = ray.direction();
 
-        origin.set(0, self.cos_theta * ray.origin().ix(0) - self.sin_theta * ray.origin().ix(2));
-        origin.set(2, self.sin_theta * ray.origin().ix(0) + self.cos_theta * ray.origin().ix(2));
+        origin.set(i, self.cos_theta * ray.origin().ix(i) - self.sin_theta * ray.origin().ix(j));
+        origin.set(j, self.sin_theta * ray.origin().ix(i) + self.cos_theta * ray.origin().ix(j));
 
-        direction.set(0, self.cos_theta * ray.direction().ix(0) - self.sin_theta * ray.direction().ix(2));
-        direction.set(2, self.sin_theta * ray.direction().ix(0) + self.cos_theta * ray.direction().ix(2));
+        direction.set(i, self.cos_theta * ray.direction().ix(i) - self.sin_theta * ray.direction().ix(j));
+        direction.set(j, self.sin_theta * ray.direction().ix(i) + self.cos_theta * ray.direction().ix(j));
 
         let rotated_ray = Ray::new(origin, direction, ray.time());
 
         if let Some(mut hit_record) = self.object.hit(&rotated_ray, t_min, t_max) {
             let mut new_p = hit_record.p();
-            new_p.set(0, self.cos_theta * hit_record.p().ix(0) + self.sin_theta * hit_record.p().ix(2));
-            new_p.set(2, -self.sin_theta * hit_record.p().ix(0) + self.cos_theta * hit_record.p().ix(2));
+            new_p.set(i, self.cos_theta * hit_record.p().ix(i) + self.sin_theta * hit_record.p().ix(j));
+            new_p.set(j, -self.sin_theta * hit_record.p().ix(i) + self.cos_theta * hit_record.p().ix(j));
 
             let mut new_n = hit_record.n();
-            new_n.set(0, self.cos_theta * hit_record.n().ix(0) + self.sin_theta * hit_record.n().ix(2));
-            new_n.set(2, -self.sin_theta * hit_record.n().ix(0) + self.cos_theta * hit_record.n().ix(2));
+            new_n.set(i, self.cos_theta * hit_record.n().ix(i) + self.sin_theta * hit_record.n().ix(j));
+            new_n.set(j, -self.sin_theta * hit_record.n().ix(i) + self.cos_theta * hit_record.n().ix(j));
 
             hit_record.set_p(new_p);
             hit_record.set_face_normal(&rotated_ray, new_n);

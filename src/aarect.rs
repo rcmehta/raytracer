@@ -8,6 +8,17 @@ pub enum Plane {
     ZX,
 }
 
+impl Plane {
+    pub fn axes(&self) -> (usize, usize, usize) {
+        // returns in order (a, b, k) or (first, second, invariant)
+        match self {
+            Plane::XY => (0, 1, 2),
+            Plane::YZ => (1, 2, 0),
+            Plane::ZX => (2, 0, 1),
+        }
+    }
+}
+
 pub struct AARect {
     plane: Plane,
     a0: F,
@@ -22,20 +33,11 @@ impl AARect {
     pub fn new(plane: Plane, a0: F, a1: F, b0: F, b1: F, k: F, material: Arc<M>) -> Self {
         Self { plane, a0, a1, b0, b1, k, material }
     }
-
-    pub fn axes(&self) -> (usize, usize, usize) {
-        // returns in order (a, b, k)
-        match self.plane {
-            Plane::XY => (0, 1, 2),
-            Plane::YZ => (1, 2, 0),
-            Plane::ZX => (2, 0, 1),
-        }
-    }
 }
 
 impl Hittable for AARect {
     fn hit(&self, ray: &Ray, t_min: F, t_max: F) -> Option<HitRecord> {
-        let (a_axis, b_axis, k_axis) = self.axes();
+        let (a_axis, b_axis, k_axis) = self.plane.axes();
 
         let t = (self.k - ray.origin().ix(k_axis)) / ray.direction().ix(k_axis);
 
@@ -67,7 +69,7 @@ impl Hittable for AARect {
 
     fn bounding_box(&self, _time0: F, _time1: F) -> Option<AABB> {
         let depth = 1e-4;
-        let order = self.axes();
+        let order = self.plane.axes();
 
         let mut min = Point3::zero();
         min.set_all(order, (self.a0, self.b0, self.k - depth));
