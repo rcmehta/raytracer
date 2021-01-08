@@ -295,10 +295,10 @@ fn _cornell_box() -> (Camera, HittableList) {
         Arc::clone(&white)));
 
     let box1 = Translate::new(
-        Arc::new(Rotate::new(box1, 15.0)),
+        Arc::new(Rotate::new(box1, Plane::ZX, -15.0)),
         Vec3::new(265.0, 0.0, 295.0));
     let box2 = Translate::new(
-        Arc::new(Rotate::new(box2, -18.0)),
+        Arc::new(Rotate::new(box2, Plane::ZX, 18.0)),
         Vec3::new(130.0, 0.0, 65.0));
 
     world.add(Arc::new(box1));
