@@ -43,6 +43,10 @@ impl Lambertian {
     pub fn colour(colour: Colour) -> Self {
         Lambertian { albedo: Arc::new(SolidColour::new(colour)) }
     }
+
+    pub fn rgb(r: F, g: F, b: F) -> Self {
+        Lambertian { albedo: Arc::new(SolidColour::new(Colour::new(r, g, b))) }
+    }
 }
 
 impl Material for Lambertian {
@@ -148,8 +152,8 @@ impl DiffuseLight {
         Self { emit }
     }
 
-    pub fn colour(colour: Colour) -> Self {
-        Self { emit: Arc::new(SolidColour::new(colour))}
+    pub fn rgb(r: F, g: F, b: F) -> Self {
+        Self { emit: Arc::new(SolidColour::new(Colour::new(r, g, b)))}
     }
 }
 

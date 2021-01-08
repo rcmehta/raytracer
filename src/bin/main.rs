@@ -7,7 +7,7 @@ use rayon::prelude::*;
 
 use std::{error::Error, fs, io::Write, sync::Arc};
 
-use raytracer::{aarect::*, camera::*, hittable::*, material::*, moving_sphere::*, ray::*, sphere::*, texture::*, transform::*, vec3::*};
+use raytracer::{aarect::*, camera::*, hittable::*, material::*, medium::*, moving_sphere::*, ray::*, sphere::*, texture::*, transform::*, vec3::*};
 
 // Image Constants
 const ASPECT_RATIO: F = 1.0;
@@ -18,7 +18,7 @@ const MAX_DEPTH: u32 = 50;
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Camera, World
-    let (camera, world) = _cornell_box();
+    let (camera, world) = _cornell_smoke();
 
     // Background
     let background = Colour::new(0.0, 0.0, 0.0);
@@ -126,7 +126,7 @@ fn _random_scene() -> (Camera, HittableList) {
         }
     }
 
-    let lambertian = Arc::new(Lambertian::colour(Colour::new(0.4, 0.2, 0.1)));
+    let lambertian = Arc::new(Lambertian::rgb(0.4, 0.2, 0.1));
     world.add(Arc::new(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
@@ -244,7 +244,7 @@ fn _simple_light() -> (Camera, HittableList) {
         Arc::clone(&material),
     )));
 
-    let diff_light: Arc<M> = Arc::new(DiffuseLight::colour(Colour::new(4.0, 4.0, 4.0)));
+    let diff_light: Arc<M> = Arc::new(DiffuseLight::rgb(4.0, 4.0, 4.0));
 
     world.add(Arc::new(AARect::new(Plane::XY, 3.0, 5.0, 1.0, 3.0, -2.0, diff_light)));
 
@@ -272,11 +272,11 @@ fn _cornell_box() -> (Camera, HittableList) {
 
     let mut world = HittableList::new();
 
-    let red: Arc<M> = Arc::new(Lambertian::colour(Colour::new(0.65, 0.05, 0.05)));
-    let white: Arc<M> = Arc::new(Lambertian::colour(Colour::new(0.73, 0.73, 0.73)));
-    let green: Arc<M> = Arc::new(Lambertian::colour(Colour::new(0.12, 0.45, 0.15)));
+    let red: Arc<M> = Arc::new(Lambertian::rgb(0.65, 0.05, 0.05));
+    let white: Arc<M> = Arc::new(Lambertian::rgb(0.73, 0.73, 0.73));
+    let green: Arc<M> = Arc::new(Lambertian::rgb(0.12, 0.45, 0.15));
 
-    let light: Arc<M> = Arc::new(DiffuseLight::colour(Colour::new(15.0, 15.0, 15.0)));
+    let light: Arc<M> = Arc::new(DiffuseLight::rgb(15.0, 15.0, 15.0));
 
     world.add(Arc::new(AARect::new(Plane::YZ, 0.0, 555.0, 0.0, 555.0, 555.0, Arc::clone(&green))));
     world.add(Arc::new(AARect::new(Plane::YZ, 0.0, 555.0, 0.0, 555.0, 0.0, Arc::clone(&red))));
@@ -303,6 +303,70 @@ fn _cornell_box() -> (Camera, HittableList) {
 
     world.add(Arc::new(box1));
     world.add(Arc::new(box2));
+
+    (camera, world)
+}
+
+fn _cornell_smoke() -> (Camera, HittableList) {
+    let look_from = Point3::new(278.0, 278.0, -800.0);
+    let look_at = Point3::new(278.0, 278.0, 0.0);
+    let v_up = Point3::new(0.0, 1.0, 0.0);
+    let vfov = 40.0;
+    let distance_to_focus = 10.0;
+    let aperture = 0.0;
+
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        v_up,
+        vfov,
+        ASPECT_RATIO,
+        aperture,
+        distance_to_focus,
+        0.0, 1.0,
+    );
+
+    let mut world = HittableList::new();
+
+    let red: Arc<M> = Arc::new(Lambertian::rgb(0.65, 0.05, 0.05));
+    let white: Arc<M> = Arc::new(Lambertian::rgb(0.73, 0.73, 0.73));
+    let green: Arc<M> = Arc::new(Lambertian::rgb(0.12, 0.45, 0.15));
+
+    let light: Arc<M> = Arc::new(DiffuseLight::rgb(7.0, 7.0, 7.0));
+
+    world.add(Arc::new(AARect::new(Plane::YZ, 0.0, 555.0, 0.0, 555.0, 555.0, Arc::clone(&green))));
+    world.add(Arc::new(AARect::new(Plane::YZ, 0.0, 555.0, 0.0, 555.0, 0.0, Arc::clone(&red))));
+    world.add(Arc::new(AARect::new(Plane::ZX, 113.0, 443.0, 127.0, 432.0, 554.0, Arc::clone(&light))));
+    world.add(Arc::new(AARect::new(Plane::ZX, 0.0, 555.0, 0.0, 555.0, 0.0, Arc::clone(&white))));
+    world.add(Arc::new(AARect::new(Plane::ZX, 0.0, 555.0, 0.0, 555.0, 555.0, Arc::clone(&white))));
+    world.add(Arc::new(AARect::new(Plane::XY, 0.0, 555.0, 0.0, 555.0, 555.0, Arc::clone(&white))));
+
+    let box1 = Arc::new(AABox::new(
+        Point3::zero(),
+        Point3::new(165.0, 330.0, 165.0), 
+        Arc::clone(&white)));
+    let box2 = Arc::new(AABox::new(
+        Point3::zero(),
+        Point3::new(165.0, 165.0, 165.0), 
+        Arc::clone(&white)));
+
+    let box1 = Translate::new(
+        Arc::new(Rotate::new(box1, Plane::ZX, -15.0)),
+        Vec3::new(265.0, 0.0, 295.0));
+    let box2 = Translate::new(
+        Arc::new(Rotate::new(box2, Plane::ZX, 18.0)),
+        Vec3::new(130.0, 0.0, 65.0));
+
+    let black_texture: Arc<T> = Arc::new(SolidColour::rgb(0.0, 0.0, 0.0));
+    let white_texture: Arc<T> = Arc::new(SolidColour::rgb(1.0, 1.0, 1.0));
+    world.add(Arc::new(ConstantMedium::new(
+        Arc::new(box1),
+        black_texture,
+        0.01)));
+    world.add(Arc::new(ConstantMedium::new(
+        Arc::new(box2),
+        white_texture,
+        0.01)));
 
     (camera, world)
 }

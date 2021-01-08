@@ -4,6 +4,7 @@ pub mod bvh;
 pub mod camera;
 pub mod hittable;
 pub mod material;
+pub mod medium;
 pub mod moving_sphere;
 pub mod perlin;
 pub mod ray;
