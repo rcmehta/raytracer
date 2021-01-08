@@ -19,7 +19,7 @@ pub struct ScatterRecord {
 
 impl ScatterRecord {
     pub fn new(ray: Ray, colour: Colour) -> Self {
-        Self { ray, colour } 
+        Self { ray, colour }
     }
 
     pub fn ray(&self) -> &Ray {
@@ -41,11 +41,15 @@ impl Lambertian {
     }
 
     pub fn colour(colour: Colour) -> Self {
-        Lambertian { albedo: Arc::new(SolidColour::new(colour)) }
+        Lambertian {
+            albedo: Arc::new(SolidColour::new(colour)),
+        }
     }
 
     pub fn rgb(r: F, g: F, b: F) -> Self {
-        Lambertian { albedo: Arc::new(SolidColour::new(Colour::new(r, g, b))) }
+        Lambertian {
+            albedo: Arc::new(SolidColour::new(Colour::new(r, g, b))),
+        }
     }
 }
 
@@ -95,7 +99,6 @@ impl Material for Metal {
         } else {
             None
         }
-            
     }
 }
 
@@ -153,7 +156,9 @@ impl DiffuseLight {
     }
 
     pub fn rgb(r: F, g: F, b: F) -> Self {
-        Self { emit: Arc::new(SolidColour::new(Colour::new(r, g, b)))}
+        Self {
+            emit: Arc::new(SolidColour::new(Colour::new(r, g, b))),
+        }
     }
 }
 

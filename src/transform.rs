@@ -28,7 +28,10 @@ impl Hittable for Translate {
 
     fn bounding_box(&self, time0: F, time1: F) -> Option<AABB> {
         if let Some(output_box) = self.object.bounding_box(time0, time1) {
-            Some(AABB::new(output_box.min() + self.offset, output_box.max() + self.offset))
+            Some(AABB::new(
+                output_box.min() + self.offset,
+                output_box.max() + self.offset,
+            ))
         } else {
             None
         }
@@ -66,19 +69,24 @@ impl Rotate {
                     let new_z = -sin_theta * x + cos_theta * z;
 
                     let temp = Vec3::new(new_x, y, new_z);
-                    
+
                     for a in 0..2 {
                         min.set(a, min.ix(a).min(temp.ix(a)));
                         max.set(a, max.ix(a).max(temp.ix(a)));
                     }
-
                 }
             }
         }
 
         let bbox = Some(AABB::new(min, max));
 
-        Self { object, plane, sin_theta, cos_theta, bbox }
+        Self {
+            object,
+            plane,
+            sin_theta,
+            cos_theta,
+            bbox,
+        }
     }
 }
 
@@ -88,22 +96,46 @@ impl Hittable for Rotate {
         let mut origin = ray.origin();
         let mut direction = ray.direction();
 
-        origin.set(i, self.cos_theta * ray.origin().ix(i) - self.sin_theta * ray.origin().ix(j));
-        origin.set(j, self.sin_theta * ray.origin().ix(i) + self.cos_theta * ray.origin().ix(j));
+        origin.set(
+            i,
+            self.cos_theta * ray.origin().ix(i) - self.sin_theta * ray.origin().ix(j),
+        );
+        origin.set(
+            j,
+            self.sin_theta * ray.origin().ix(i) + self.cos_theta * ray.origin().ix(j),
+        );
 
-        direction.set(i, self.cos_theta * ray.direction().ix(i) - self.sin_theta * ray.direction().ix(j));
-        direction.set(j, self.sin_theta * ray.direction().ix(i) + self.cos_theta * ray.direction().ix(j));
+        direction.set(
+            i,
+            self.cos_theta * ray.direction().ix(i) - self.sin_theta * ray.direction().ix(j),
+        );
+        direction.set(
+            j,
+            self.sin_theta * ray.direction().ix(i) + self.cos_theta * ray.direction().ix(j),
+        );
 
         let rotated_ray = Ray::new(origin, direction, ray.time());
 
         if let Some(mut hit_record) = self.object.hit(&rotated_ray, t_min, t_max) {
             let mut new_p = hit_record.p();
-            new_p.set(i, self.cos_theta * hit_record.p().ix(i) + self.sin_theta * hit_record.p().ix(j));
-            new_p.set(j, -self.sin_theta * hit_record.p().ix(i) + self.cos_theta * hit_record.p().ix(j));
+            new_p.set(
+                i,
+                self.cos_theta * hit_record.p().ix(i) + self.sin_theta * hit_record.p().ix(j),
+            );
+            new_p.set(
+                j,
+                -self.sin_theta * hit_record.p().ix(i) + self.cos_theta * hit_record.p().ix(j),
+            );
 
             let mut new_n = hit_record.n();
-            new_n.set(i, self.cos_theta * hit_record.n().ix(i) + self.sin_theta * hit_record.n().ix(j));
-            new_n.set(j, -self.sin_theta * hit_record.n().ix(i) + self.cos_theta * hit_record.n().ix(j));
+            new_n.set(
+                i,
+                self.cos_theta * hit_record.n().ix(i) + self.sin_theta * hit_record.n().ix(j),
+            );
+            new_n.set(
+                j,
+                -self.sin_theta * hit_record.n().ix(i) + self.cos_theta * hit_record.n().ix(j),
+            );
 
             hit_record.set_p(new_p);
             hit_record.set_face_normal(&rotated_ray, new_n);
@@ -118,4 +150,3 @@ impl Hittable for Rotate {
         self.bbox
     }
 }
-

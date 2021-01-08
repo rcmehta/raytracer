@@ -15,7 +15,11 @@ impl ConstantMedium {
     pub fn new(boundary: Arc<H>, texture: Arc<T>, density: F) -> Self {
         let neg_inv_density = -1.0 / density;
         let phase_function = Arc::new(Isotropic::new(texture));
-        Self { boundary, phase_function, neg_inv_density }
+        Self {
+            boundary,
+            phase_function,
+            neg_inv_density,
+        }
     }
 }
 
@@ -44,7 +48,8 @@ impl Hittable for ConstantMedium {
                         let p = ray.at(t);
                         let n = Vec3::new(1.0, 0.0, 0.0); // + front_face arbitrary
                         let tp = hit_record1.tp(); // arbitrary
-                        let hit_record = HitRecord::new(p, n, t, tp, true, Arc::clone(&self.phase_function));
+                        let hit_record =
+                            HitRecord::new(p, n, t, tp, true, Arc::clone(&self.phase_function));
                         Some(hit_record)
                     }
                 }
@@ -73,9 +78,9 @@ impl Isotropic {
 
 impl Material for Isotropic {
     fn scatter(&self, ray_in: &Ray, hit_record: &mut HitRecord) -> Option<ScatterRecord> {
-        let scattered = Ray::new(hit_record.p(), Vec3::random_on_unit_sphere(), ray_in.time());
+        let ray_scattered = Ray::new(hit_record.p(), Vec3::random_on_unit_sphere(), ray_in.time());
         let attentuation = self.albedo.value(hit_record.tp(), hit_record.p());
 
-        Some(ScatterRecord::new(scattered, attentuation))
+        Some(ScatterRecord::new(ray_scattered, attentuation))
     }
 }

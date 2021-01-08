@@ -31,7 +31,15 @@ pub struct AARect {
 
 impl AARect {
     pub fn new(plane: Plane, a0: F, a1: F, b0: F, b1: F, k: F, material: Arc<M>) -> Self {
-        Self { plane, a0, a1, b0, b1, k, material }
+        Self {
+            plane,
+            a0,
+            a1,
+            b0,
+            b1,
+            k,
+            material,
+        }
     }
 }
 
@@ -54,12 +62,13 @@ impl Hittable for AARect {
 
                 let mut outward_normal = Vec3::zero();
                 outward_normal.set(k_axis, 1.0);
-                
+
                 let u = (a - self.a0) / (self.a1 - self.a0);
                 let v = (b - self.b0) / (self.b1 - self.b0);
                 let tp = TexturePoint::new(u, v);
 
-                let mut hit_record = HitRecord::new(p, outward_normal, t, tp, true, Arc::clone(&self.material));
+                let mut hit_record =
+                    HitRecord::new(p, outward_normal, t, tp, true, Arc::clone(&self.material));
                 hit_record.set_face_normal(ray, outward_normal);
 
                 return Some(hit_record);
@@ -74,13 +83,12 @@ impl Hittable for AARect {
         let mut min = Point3::zero();
         min.set_all(order, (self.a0, self.b0, self.k - depth));
         let mut max = Point3::zero();
-        max.set_all(order, (self.a1, self.b1, self.k + depth)); 
+        max.set_all(order, (self.a1, self.b1, self.k + depth));
 
         Some(AABB::new(min, max))
-
     }
 }
- 
+
 pub struct AABox {
     min: Point3,
     max: Point3,
@@ -91,12 +99,60 @@ impl AABox {
     pub fn new(min: Point3, max: Point3, material: Arc<M>) -> Self {
         let mut sides = HittableList::new();
 
-        sides.add(Arc::new(AARect::new(Plane::XY, min.x(), max.x(), min.y(), max.y(), max.z(), Arc::clone(&material)))); 
-        sides.add(Arc::new(AARect::new(Plane::XY, min.x(), max.x(), min.y(), max.y(), min.z(), Arc::clone(&material)))); 
-        sides.add(Arc::new(AARect::new(Plane::ZX, min.z(), max.z(), min.x(), max.x(), max.y(), Arc::clone(&material))));
-        sides.add(Arc::new(AARect::new(Plane::ZX, min.z(), max.z(), min.x(), max.x(), min.y(), Arc::clone(&material))));
-        sides.add(Arc::new(AARect::new(Plane::YZ, min.y(), max.y(), min.z(), max.z(), max.x(), Arc::clone(&material))));
-        sides.add(Arc::new(AARect::new(Plane::YZ, min.y(), max.y(), min.z(), max.z(), min.x(), Arc::clone(&material))));
+        sides.add(Arc::new(AARect::new(
+            Plane::XY,
+            min.x(),
+            max.x(),
+            min.y(),
+            max.y(),
+            max.z(),
+            Arc::clone(&material),
+        )));
+        sides.add(Arc::new(AARect::new(
+            Plane::XY,
+            min.x(),
+            max.x(),
+            min.y(),
+            max.y(),
+            min.z(),
+            Arc::clone(&material),
+        )));
+        sides.add(Arc::new(AARect::new(
+            Plane::ZX,
+            min.z(),
+            max.z(),
+            min.x(),
+            max.x(),
+            max.y(),
+            Arc::clone(&material),
+        )));
+        sides.add(Arc::new(AARect::new(
+            Plane::ZX,
+            min.z(),
+            max.z(),
+            min.x(),
+            max.x(),
+            min.y(),
+            Arc::clone(&material),
+        )));
+        sides.add(Arc::new(AARect::new(
+            Plane::YZ,
+            min.y(),
+            max.y(),
+            min.z(),
+            max.z(),
+            max.x(),
+            Arc::clone(&material),
+        )));
+        sides.add(Arc::new(AARect::new(
+            Plane::YZ,
+            min.y(),
+            max.y(),
+            min.z(),
+            max.z(),
+            min.x(),
+            Arc::clone(&material),
+        )));
 
         Self { min, max, sides }
     }

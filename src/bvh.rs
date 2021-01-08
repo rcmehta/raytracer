@@ -25,7 +25,7 @@ impl BVH {
             1 => {
                 left = Arc::clone(&(objects.ix(start)));
                 right = Arc::clone(&(objects.ix(start)));
-            },
+            }
             2 => {
                 if AABB::box_compare(objects.ix(start), objects.ix(start + 1), axis) {
                     left = Arc::clone(&(objects.ix(start)));
@@ -34,13 +34,13 @@ impl BVH {
                     left = Arc::clone(&(objects.ix(start + 1)));
                     right = Arc::clone(&(objects.ix(start)));
                 }
-            },
+            }
             _ => {
-                let mid = start + object_span  / 2;
+                let mid = start + object_span / 2;
 
                 left = Arc::new(BVH::new(objects, start, mid, time0, time1));
-                right = Arc::new(BVH::new(objects, mid, end, time0, time1)); 
-            },
+                right = Arc::new(BVH::new(objects, mid, end, time0, time1));
+            }
         }
 
         let box_left = left.bounding_box(time0, time1);
@@ -60,10 +60,10 @@ impl Hittable for BVH {
         if self.bbox.hit(&ray, t_min, t_max) {
             let hit_record = self.left.hit(&ray, t_min, t_max);
 
-            let t_max = if let Some(ref record) = hit_record { 
-                record.t() 
-            } else { 
-                t_max 
+            let t_max = if let Some(ref record) = hit_record {
+                record.t()
+            } else {
+                t_max
             };
 
             if let Some(record) = self.right.hit(&ray, t_min, t_max) {
@@ -80,4 +80,3 @@ impl Hittable for BVH {
         Some(self.bbox)
     }
 }
-

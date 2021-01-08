@@ -3,24 +3,36 @@ use std::sync::Arc;
 use crate::{aabb::AABB, hittable::*, ray::Ray, sphere::Sphere, vec3::*};
 
 pub struct MovingSphere {
-    centre0: Point3, centre1: Point3,
-    time0: F, time1: F,
+    centre0: Point3,
+    centre1: Point3,
+    time0: F,
+    time1: F,
     radius: F,
     material: Arc<M>,
 }
 
 impl MovingSphere {
     pub fn new(
-        centre0: Point3, centre1: Point3,
-        time0: F, time1: F,
+        centre0: Point3,
+        centre1: Point3,
+        time0: F,
+        time1: F,
         radius: F,
         material: Arc<M>,
     ) -> Self {
-        MovingSphere { centre0, centre1, time0, time1, radius, material }
+        MovingSphere {
+            centre0,
+            centre1,
+            time0,
+            time1,
+            radius,
+            material,
+        }
     }
 
     pub fn centre(&self, time: F) -> Point3 {
-        self.centre0 + (self.centre1 - self.centre0) * ((time - self.time0) / (self.time1 - self.time0))
+        self.centre0
+            + (self.centre1 - self.centre0) * ((time - self.time0) / (self.time1 - self.time0))
     }
 }
 
@@ -48,8 +60,14 @@ impl Hittable for MovingSphere {
         let p = ray.at(root);
         let outward_normal = (p - self.centre(ray.time())) / self.radius;
         let tp = Sphere::tp(outward_normal);
-        let mut hit_record =
-            HitRecord::new(p, outward_normal, root, tp, true, Arc::clone(&self.material));
+        let mut hit_record = HitRecord::new(
+            p,
+            outward_normal,
+            root,
+            tp,
+            true,
+            Arc::clone(&self.material),
+        );
         hit_record.set_face_normal(ray, outward_normal);
 
         Some(hit_record)

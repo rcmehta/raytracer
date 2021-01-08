@@ -32,7 +32,7 @@ impl Sphere {
         //     <1 0 0> yields <0.50 0.50>       <-1  0  0> yields <0.00 0.50>
         //     <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
         //     <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
-        
+
         const PI: F = std::f64::consts::PI;
 
         let theta = (-p.y()).acos();
@@ -69,8 +69,14 @@ impl Hittable for Sphere {
         let p = ray.at(root);
         let outward_normal = (p - self.centre) / self.radius;
         let tp = Sphere::tp(outward_normal);
-        let mut hit_record =
-            HitRecord::new(p, outward_normal, root, tp, true, Arc::clone(&self.material));
+        let mut hit_record = HitRecord::new(
+            p,
+            outward_normal,
+            root,
+            tp,
+            true,
+            Arc::clone(&self.material),
+        );
         hit_record.set_face_normal(ray, outward_normal);
 
         Some(hit_record)

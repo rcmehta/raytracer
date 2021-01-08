@@ -13,12 +13,19 @@ pub struct Perlin {
 
 impl Perlin {
     pub fn new() -> Self {
-        let random_vectors: Vec<Vec3> = (0..POINT_COUNT).map(|_| Vec3::random_vector(-1.0, 1.0)).collect();
+        let random_vectors: Vec<Vec3> = (0..POINT_COUNT)
+            .map(|_| Vec3::random_vector(-1.0, 1.0))
+            .collect();
         let perm_x = Perlin::generate_perm();
         let perm_y = Perlin::generate_perm();
         let perm_z = Perlin::generate_perm();
 
-        Self { random_vectors, perm_x, perm_y, perm_z }
+        Self {
+            random_vectors,
+            perm_x,
+            perm_y,
+            perm_z,
+        }
     }
 
     fn generate_perm() -> Vec<usize> {
@@ -43,12 +50,11 @@ impl Perlin {
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
-                    c[di][dj][dk] = self.random_vectors[(
-                        self.perm_x[(i + di as i32) as usize & 255] ^
-                        self.perm_y[(j + dj as i32) as usize & 255] ^
-                        self.perm_z[(k + dk as i32) as usize & 255]
-                    ) as usize
-                    ];
+                    c[di][dj][dk] = self.random_vectors[(self.perm_x
+                        [(i + di as i32) as usize & 255]
+                        ^ self.perm_y[(j + dj as i32) as usize & 255]
+                        ^ self.perm_z[(k + dk as i32) as usize & 255])
+                        as usize];
                 }
             }
         }
@@ -63,15 +69,15 @@ impl Perlin {
         let uu = u * u * (3.0 - 2.0 * u);
         let vv = v * v * (3.0 - 2.0 * v);
         let ww = w * w * (3.0 - 2.0 * w);
-        
+
         for i in 0..2 {
             for j in 0..2 {
                 for k in 0..2 {
                     let weight_v = Vec3::new(u - i as F, v - j as F, w - k as F);
-                    accum +=
-                    (i as F * uu + (1.0 - uu) * (1 - i) as F) *
-                    (j as F * vv + (1.0 - vv) * (1 - j) as F) *
-                    (k as F * ww + (1.0 - ww) * (1 - k) as F) * dot(&c[i][j][k], &weight_v);
+                    accum += (i as F * uu + (1.0 - uu) * (1 - i) as F)
+                        * (j as F * vv + (1.0 - vv) * (1 - j) as F)
+                        * (k as F * ww + (1.0 - ww) * (1 - k) as F)
+                        * dot(&c[i][j][k], &weight_v);
                 }
             }
         }

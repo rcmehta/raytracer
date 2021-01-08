@@ -4,7 +4,7 @@ use crate::{hittable::H, ray::Ray, vec3::*};
 
 #[derive(Clone, Copy)]
 pub struct AABB {
-    min: Point3, 
+    min: Point3,
     max: Point3,
 }
 
@@ -34,7 +34,10 @@ impl AABB {
             box0.max().z().max(box1.max().z()),
         );
 
-        Self { min: min_point, max: max_point }
+        Self {
+            min: min_point,
+            max: max_point,
+        }
     }
 
     pub fn box_compare(a: Arc<H>, b: Arc<H>, axis: usize) -> bool {
