@@ -63,6 +63,10 @@ impl HitRecord {
     pub fn set_p(&mut self, new_p: Point3) {
         self.p = new_p;
     }
+
+    pub fn set_t(&mut self, new_t: F) {
+        self.t = new_t;
+    }
 }
 
 pub struct HittableList {
