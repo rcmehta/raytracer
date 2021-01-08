@@ -19,9 +19,13 @@ impl TexturePoint {
         TexturePoint { u, v }
     }
 
-    pub fn u(&self) -> F { self.u }
+    pub fn u(&self) -> F {
+        self.u
+    }
 
-    pub fn v(&self) -> F { self.v }
+    pub fn v(&self) -> F {
+        self.v
+    }
 }
 
 pub struct SolidColour {
@@ -81,14 +85,18 @@ pub struct Noise {
 
 impl Noise {
     pub fn new(scale: F) -> Self {
-        Self { noise: Perlin::new(), scale }
+        Self {
+            noise: Perlin::new(),
+            scale,
+        }
     }
 }
 
 impl Texture for Noise {
     fn value(&self, _tp: TexturePoint, p: Point3) -> Colour {
-        Colour::one() * 0.5 * 
-        (1.0 + (self.scale * p.z() + 10.0  * self.noise.turbulence(p * self.scale, 7)).sin())
+        Colour::one()
+            * 0.5
+            * (1.0 + (self.scale * p.z() + 10.0 * self.noise.turbulence(p * self.scale, 7)).sin())
     }
 }
 
@@ -100,7 +108,9 @@ pub struct Image {
 
 impl Image {
     pub fn new(filename: &str) -> Self {
-        let rgb = open(filename).expect(&format!("Couldn't open image file {}", filename)).into_rgb8();
+        let rgb = open(filename)
+            .expect(&format!("Couldn't open image file {}", filename))
+            .into_rgb8();
         let (width, height) = rgb.dimensions();
 
         Self { rgb, width, height }
@@ -116,7 +126,7 @@ impl Texture for Image {
         let j = (v * self.height as F).floor() as u32;
 
         let colour_scale = 1.0 / 255.0;
-        
+
         let pixel = self.rgb.get_pixel(i, j);
 
         Colour::new(pixel[0] as F, pixel[1] as F, pixel[2] as F) * colour_scale

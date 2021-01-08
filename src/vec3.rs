@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Neg, Div, Mul};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 use std::{fmt::Display, fmt::Formatter, fmt::Result, iter::Sum};
 
 use rand::{thread_rng, Rng};
@@ -120,7 +120,11 @@ impl Add<Vec3> for Vec3 {
     type Output = Vec3;
 
     fn add(self, other: Self) -> Self {
-        Vec3::new(self.x() + other.x(), self.y() + other.y(), self.z() + other.z())
+        Vec3::new(
+            self.x() + other.x(),
+            self.y() + other.y(),
+            self.z() + other.z(),
+        )
     }
 }
 
@@ -136,7 +140,11 @@ impl Sub<Vec3> for Vec3 {
     type Output = Vec3;
 
     fn sub(self, other: Self) -> Self {
-        Vec3::new(self.x() - other.x(), self.y() - other.y(), self.z() - other.z())
+        Vec3::new(
+            self.x() - other.x(),
+            self.y() - other.y(),
+            self.z() - other.z(),
+        )
     }
 }
 
@@ -160,7 +168,11 @@ impl Mul<Vec3> for Vec3 {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
-        Vec3::new(self.x() * other.x(), self.y() * other.y(), self.z() * other.z())
+        Vec3::new(
+            self.x() * other.x(),
+            self.y() * other.y(),
+            self.z() * other.z(),
+        )
     }
 }
 

@@ -21,7 +21,14 @@ pub struct HitRecord {
 }
 
 impl HitRecord {
-    pub fn new(p: Point3, n: Vec3, t: F, tp: TexturePoint, front_face: bool, material: Arc<M>) -> HitRecord {
+    pub fn new(
+        p: Point3,
+        n: Vec3,
+        t: F,
+        tp: TexturePoint,
+        front_face: bool,
+        material: Arc<M>,
+    ) -> HitRecord {
         HitRecord {
             p,
             n,
@@ -111,7 +118,9 @@ impl Hittable for HittableList {
     fn bounding_box(&self, time0: F, time1: F) -> Option<AABB> {
         let mut output_box: Option<AABB> = None;
 
-        if self.objects.is_empty() { return output_box; }
+        if self.objects.is_empty() {
+            return output_box;
+        }
 
         for object in self.objects.iter() {
             if let Some(temp_box) = object.bounding_box(time0, time1) {
@@ -124,7 +133,7 @@ impl Hittable for HittableList {
                 return None;
             }
         }
-        
-        output_box        
+
+        output_box
     }
 }

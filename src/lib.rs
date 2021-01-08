@@ -8,6 +8,7 @@ pub mod medium;
 pub mod moving_sphere;
 pub mod perlin;
 pub mod ray;
+pub mod scenes;
 pub mod sphere;
 pub mod texture;
 pub mod transform;

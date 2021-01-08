@@ -8,8 +8,8 @@ pub struct Camera {
     u: Vec3,
     v: Vec3,
     lens_radius: F,
-    time0: F,   // shutter open
-    time1: F,   // shutter close
+    time0: F, // shutter open
+    time1: F, // shutter close
 }
 
 impl Camera {
