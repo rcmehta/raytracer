@@ -7,9 +7,9 @@ use crate::{
 
 // Image Constants
 pub const ASPECT_RATIO: F = 1.0;
-pub const IMAGE_HEIGHT: u32 = 400;
+pub const IMAGE_HEIGHT: u32 = 800;
 pub const IMAGE_WIDTH: u32 = (IMAGE_HEIGHT as F * ASPECT_RATIO) as u32;
-pub const SAMPLES_PER_PIXEL: u32 = 200;
+pub const SAMPLES_PER_PIXEL: u32 = 10000;
 pub const MAX_DEPTH: u32 = 50;
 
 pub fn default_camera() -> Camera {
