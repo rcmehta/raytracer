@@ -96,7 +96,7 @@ impl Texture for Noise {
     fn value(&self, _tp: TexturePoint, p: Point3) -> Colour {
         Colour::one()
             * 0.5
-            * (1.0 + (self.scale * p.z() + 10.0 * self.noise.turbulence(p * self.scale, 7)).sin())
+            * (1.0 + (self.scale * p.z() + 10.0 * self.noise.turbulence(p, 7)).sin())
     }
 }
 
