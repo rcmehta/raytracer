@@ -9,7 +9,7 @@ use crate::{
 pub const ASPECT_RATIO: F = 1.0;
 pub const IMAGE_HEIGHT: u32 = 800;
 pub const IMAGE_WIDTH: u32 = (IMAGE_HEIGHT as F * ASPECT_RATIO) as u32;
-pub const SAMPLES_PER_PIXEL: u32 = 10000;
+pub const SAMPLES_PER_PIXEL: u32 = 1000;
 pub const MAX_DEPTH: u32 = 50;
 
 pub fn default_camera() -> Camera {
@@ -528,7 +528,7 @@ pub fn _final_scene() -> (Camera, HittableList) {
     world.add(Arc::new(Sphere::new(
         Point3::new(0.0, 150.0, 145.0),
         50.0,
-        Arc::new(Lambertian::rgb(0.8, 0.8, 0.9)),
+        Arc::new(Metal::new(Colour::new(0.8, 0.8, 0.9), 1.0)),
     )));
 
     let boundary: Arc<H> = Arc::new(Sphere::new(
